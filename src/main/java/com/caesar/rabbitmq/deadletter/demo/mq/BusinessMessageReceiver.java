@@ -8,15 +8,17 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static com.caesar.rabbitmq.deadletter.demo.config.RabbitMqConfig.BUSINESS_QUEUEA_NAME;
-import static com.caesar.rabbitmq.deadletter.demo.config.RabbitMqConfig.BUSINESS_QUEUEB_NAME;
-
 /**
  * @author Nicolas Caesar
  */
 @Slf4j
 @Component
 public class BusinessMessageReceiver {
+
+    public static final String BUSINESS_QUEUEA_NAME = "dead.letter.demo.simple.business.queuea";
+
+    public static final String BUSINESS_QUEUEB_NAME = "dead.letter.demo.simple.business.queueb";
+
 
     @RabbitListener(queues = BUSINESS_QUEUEA_NAME)
     public void receiveA(Message message, Channel channel) throws IOException {
@@ -25,14 +27,14 @@ public class BusinessMessageReceiver {
         boolean ack = true;
         Exception exception = null;
         try {
-            if (msg.contains("deadletter")){
+            if (msg.contains("deadletter")) {
                 throw new RuntimeException("dead letter exception");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             ack = false;
             exception = e;
         }
-        if (!ack){
+        if (!ack) {
             log.error("消息消费发生异常，error msg:{}", exception.getMessage(), exception);
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         } else {

@@ -17,6 +17,9 @@ import static com.caesar.rabbitmq.deadletter.demo.config.RabbitMqConfig.*;
 @Component
 public class DeadLetterMessageReceiver {
 
+    public static final String DEAD_LETTER_QUEUEA_NAME = "dead.letter.demo.simple.deadletter.queuea";
+
+    public static final String DEAD_LETTER_QUEUEB_NAME = "dead.letter.demo.simple.deadletter.queueb";
 
     @RabbitListener(queues = DEAD_LETTER_QUEUEA_NAME)
     public void receiveA(Message message, Channel channel) throws IOException {

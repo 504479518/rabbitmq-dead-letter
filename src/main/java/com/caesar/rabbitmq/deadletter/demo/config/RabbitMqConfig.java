@@ -1,5 +1,6 @@
 package com.caesar.rabbitmq.deadletter.demo.config;
 
+import com.caesar.rabbitmq.deadletter.demo.enums.QueueEnum;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -14,22 +15,12 @@ import java.util.Map;
 @Configuration
 public class RabbitMqConfig {
 
-    public static final String BUSINESS_EXCHANGE_NAME = "dead.letter.demo.simple.business.exchange";
-    public static final String BUSINESS_QUEUEA_NAME = "dead.letter.demo.simple.business.queuea";
-    public static final String BUSINESS_QUEUEB_NAME = "dead.letter.demo.simple.business.queueb";
-    public static final String DEAD_LETTER_EXCHANGE = "dead.letter.demo.simple.deadletter.exchange";
-    public static final String DEAD_LETTER_QUEUEA_ROUTING_KEY = "dead.letter.demo.simple.deadletter.queuea.routingkey";
-    public static final String DEAD_LETTER_QUEUEB_ROUTING_KEY = "dead.letter.demo.simple.deadletter.queueb.routingkey";
-    public static final String DEAD_LETTER_QUEUEA_NAME = "dead.letter.demo.simple.deadletter.queuea";
-    public static final String DEAD_LETTER_QUEUEB_NAME = "dead.letter.demo.simple.deadletter.queueb";
-
-
     /**
      * 声明业务Exchange
      */
     @Bean("businessExchange")
     public FanoutExchange businessExchange() {
-        return new FanoutExchange(BUSINESS_EXCHANGE_NAME);
+        return new FanoutExchange(QueueEnum.QUEUE_BUSINESS_A_PACED.getExchange());
     }
 
     /**
@@ -37,7 +28,7 @@ public class RabbitMqConfig {
      */
     @Bean("deadLetterExchange")
     public DirectExchange deadLetterExchange() {
-        return new DirectExchange(DEAD_LETTER_EXCHANGE);
+        return new DirectExchange(QueueEnum.QUEUE_TTL_A_PACED.getExchange());
     }
 
     /**
@@ -47,10 +38,10 @@ public class RabbitMqConfig {
     public Queue businessQueueA() {
         Map<String, Object> args = new HashMap<>(2);
 //       x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
-        args.put("x-dead-letter-exchange", DEAD_LETTER_EXCHANGE);
+        args.put("x-dead-letter-exchange", QueueEnum.QUEUE_TTL_A_PACED.getExchange());
 //       x-dead-letter-routing-key  这里声明当前队列的死信路由key
-        args.put("x-dead-letter-routing-key", DEAD_LETTER_QUEUEA_ROUTING_KEY);
-        return QueueBuilder.durable(BUSINESS_QUEUEA_NAME).withArguments(args).build();
+        args.put("x-dead-letter-routing-key", QueueEnum.QUEUE_TTL_A_PACED.getRouteKey());
+        return QueueBuilder.durable(QueueEnum.QUEUE_BUSINESS_B_PACED.getName()).withArguments(args).build();
     }
 
     /**
@@ -60,10 +51,10 @@ public class RabbitMqConfig {
     public Queue businessQueueB() {
         Map<String, Object> args = new HashMap<>(2);
 //       x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
-        args.put("x-dead-letter-exchange", DEAD_LETTER_EXCHANGE);
+        args.put("x-dead-letter-exchange", QueueEnum.QUEUE_TTL_B_PACED.getExchange());
 //       x-dead-letter-routing-key  这里声明当前队列的死信路由key
-        args.put("x-dead-letter-routing-key", DEAD_LETTER_QUEUEB_ROUTING_KEY);
-        return QueueBuilder.durable(BUSINESS_QUEUEB_NAME).withArguments(args).build();
+        args.put("x-dead-letter-routing-key", QueueEnum.QUEUE_TTL_B_PACED.getRouteKey());
+        return QueueBuilder.durable(QueueEnum.QUEUE_BUSINESS_B_PACED.getName()).withArguments(args).build();
     }
 
 
@@ -72,7 +63,7 @@ public class RabbitMqConfig {
      */
     @Bean("deadLetterQueueA")
     public Queue deadLetterQueueA() {
-        return new Queue(DEAD_LETTER_QUEUEA_NAME);
+        return new Queue(QueueEnum.QUEUE_TTL_A_PACED.getName());
     }
 
     /**
@@ -80,7 +71,7 @@ public class RabbitMqConfig {
      */
     @Bean("deadLetterQueueB")
     public Queue deadLetterQueueB() {
-        return new Queue(DEAD_LETTER_QUEUEB_NAME);
+        return new Queue(QueueEnum.QUEUE_TTL_B_PACED.getName());
     }
 
     /**
@@ -107,7 +98,7 @@ public class RabbitMqConfig {
     @Bean
     public Binding deadLetterBindingA(@Qualifier("deadLetterQueueA") Queue queue,
                                       @Qualifier("deadLetterExchange") DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(DEAD_LETTER_QUEUEA_ROUTING_KEY);
+        return BindingBuilder.bind(queue).to(exchange).with(QueueEnum.QUEUE_TTL_B_PACED.getRouteKey());
     }
 
     /**
@@ -116,6 +107,6 @@ public class RabbitMqConfig {
     @Bean
     public Binding deadLetterBindingB(@Qualifier("deadLetterQueueB") Queue queue,
                                       @Qualifier("deadLetterExchange") DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(DEAD_LETTER_QUEUEB_ROUTING_KEY);
+        return BindingBuilder.bind(queue).to(exchange).with(QueueEnum.QUEUE_TTL_B_PACED.getRouteKey());
     }
 }

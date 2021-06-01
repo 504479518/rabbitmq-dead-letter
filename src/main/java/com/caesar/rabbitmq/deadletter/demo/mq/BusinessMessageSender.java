@@ -1,10 +1,9 @@
 package com.caesar.rabbitmq.deadletter.demo.mq;
 
+import com.caesar.rabbitmq.deadletter.demo.enums.QueueEnum;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static com.caesar.rabbitmq.deadletter.demo.config.RabbitMqConfig.BUSINESS_EXCHANGE_NAME;
 
 /**
  * @author Nicolas Caesar
@@ -15,7 +14,7 @@ public class BusinessMessageSender {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void sendMsg(String msg){
-        rabbitTemplate.convertSendAndReceive(BUSINESS_EXCHANGE_NAME, "", msg);
+    public void sendMsg(String msg) {
+        rabbitTemplate.convertSendAndReceive(QueueEnum.QUEUE_BUSINESS_A_PACED.getExchange(), "", msg);
     }
 }
